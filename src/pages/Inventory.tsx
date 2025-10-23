@@ -12,7 +12,6 @@ import {
   TrendingUp, 
   TrendingDown,
   Minus,
-  Radio,
   Search,
   Filter
 } from "lucide-react";
@@ -113,14 +112,14 @@ export default function Inventory() {
   };
 
   const getSupplyStatus = (product: Product) => {
-    if (!product.supply_level) return { text: "Apt supply", color: "bg-success" };
+    if (!product.supply_level) return { text: "Normal Supply", color: "bg-success", variant: "default" as const };
     
     if (product.supply_level > 100) {
-      return { text: "Over supply", color: "bg-destructive" };
+      return { text: "Oversupply", color: "bg-destructive", variant: "destructive" as const };
     } else if (product.supply_level < 67) {
-      return { text: "Under supply", color: "bg-warning" };
+      return { text: "Undersupply", color: "bg-warning", variant: "secondary" as const };
     }
-    return { text: "Apt supply", color: "bg-success" };
+    return { text: "Normal Supply", color: "bg-success", variant: "default" as const };
   };
 
   const getDepletionColor = (depletion: string | null) => {
@@ -150,23 +149,45 @@ export default function Inventory() {
   };
 
   const calculateFinancialStatus = (product: Product) => {
-    const netProfit = product.redistribution_revenue - product.redistribution_cost;
-    const isProf = netProfit >= 0;
+    // Calculate redistributable quantity (oversupply amount)
+    const redistributableQty = Math.max(0, product.quantity - product.over_supply_limit);
+    
+    // Expected revenue from selling at suggested price
+    const expectedRevenue = redistributableQty * product.suggested_selling_price;
+    
+    // Original cost (what we paid for this stock)
+    const originalCost = redistributableQty * product.acquired_price;
+    
+    // Redistribution cost (logistics + misc fees, estimated at 10% of original cost)
+    const redistributionCost = originalCost * 0.10;
+    
+    // Net profit/loss = revenue - original cost - redistribution cost
+    const netProfit = expectedRevenue - originalCost - redistributionCost;
+    
+    const isProfitable = netProfit > 50;
+    const breakEven = Math.abs(netProfit) <= 50;
+    
     return {
-      redistributableQty: product.redistributable_quantity,
-      expectedRevenue: product.redistribution_revenue,
-      originalCost: product.acquired_price * product.redistributable_quantity,
+      redistributableQty,
+      expectedRevenue,
+      originalCost,
+      redistributionCost,
       netProfit,
-      isProfitable: isProf,
-      breakEven: Math.abs(netProfit) < 100,
+      isProfitable,
+      breakEven,
     };
   };
 
   const toggleEligibility = async (productId: string, currentStatus: boolean | null) => {
-    await supabase
+    const { error } = await supabase
       .from("products")
       .update({ eligible_for_redistribution: !currentStatus })
       .eq("id", productId);
+    
+    if (!error) {
+      // Refresh the products data
+      window.location.reload();
+    }
   };
 
   const filteredProducts = products?.filter((product) => {
@@ -243,7 +264,13 @@ export default function Inventory() {
                   return (
                     <Card
                       key={product.id}
-                      className="bg-success/5 border-success/20 hover:border-success/40 transition-colors"
+                      className={`transition-all hover:shadow-md ${
+                        (product.supply_level || 0) > 100 
+                          ? "bg-destructive/5 border-destructive/20 hover:border-destructive/40" 
+                          : (product.supply_level || 0) < 67
+                          ? "bg-warning/5 border-warning/20 hover:border-warning/40"
+                          : "bg-card border-border hover:border-primary/40"
+                      }`}
                     >
                       <CardContent className="pt-6">
                         <div className="space-y-4">
@@ -266,10 +293,7 @@ export default function Inventory() {
                                     {product.quantity} <span className="text-lg font-normal text-muted-foreground">{product.unit}</span>
                                   </p>
                                 </div>
-                                <Badge
-                                  variant="outline"
-                                  className="border-success text-success bg-success/10"
-                                >
+                                <Badge variant={supplyStatus.variant}>
                                   {supplyStatus.text}
                                 </Badge>
                               </div>
@@ -277,24 +301,22 @@ export default function Inventory() {
 
                             <div className="flex items-center gap-4">
                               <div
-                                className="flex items-center gap-2 cursor-pointer hover:opacity-80"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleEligibility(product.id, product.eligible_for_redistribution);
-                                }}
+                                className="flex items-center gap-2"
                               >
-                                <Radio
-                                  className={`w-5 h-5 ${
-                                    product.eligible_for_redistribution
-                                      ? "text-success fill-success"
-                                      : "text-destructive"
-                                  }`}
-                                />
-                                <span className="text-sm font-medium">
-                                  {product.eligible_for_redistribution
-                                    ? "Eligible for Redistribution"
-                                    : "In Redistribution"}
-                                </span>
+                                <Button
+                                  size="sm"
+                                  variant={product.eligible_for_redistribution ? "default" : "destructive"}
+                                  className="gap-2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleEligibility(product.id, product.eligible_for_redistribution);
+                                  }}
+                                >
+                                  <div className={`w-2 h-2 rounded-full ${
+                                    product.eligible_for_redistribution ? "bg-success" : "bg-destructive"
+                                  }`} />
+                                  {product.eligible_for_redistribution ? "Eligible" : "Not Eligible"}
+                                </Button>
                               </div>
 
                               <div
@@ -380,50 +402,92 @@ export default function Inventory() {
                                 </div>
                               </div>
 
-                              <div className="bg-muted/50 p-4 rounded-lg space-y-3">
-                                <p className="font-semibold text-foreground">
-                                  Net Financial Status (Post-Redistribution)
-                                </p>
-                                <div className="grid grid-cols-3 gap-4 text-sm">
-                                  <div>
-                                    <p className="text-muted-foreground mb-1">Redistributable Quantity:</p>
-                                    <p className="font-semibold">
-                                      {financialStatus.redistributableQty} {product.unit}
-                                    </p>
+                              <div className="bg-card border border-border p-6 rounded-lg space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <h4 className="font-semibold text-lg text-foreground">
+                                    Redistribution Financial Analysis
+                                  </h4>
+                                  {financialStatus.redistributableQty > 0 && (
+                                    <Badge variant={financialStatus.isProfitable ? "default" : financialStatus.breakEven ? "secondary" : "destructive"}>
+                                      {financialStatus.breakEven ? "Break-even" : financialStatus.isProfitable ? "Profitable" : "Loss"}
+                                    </Badge>
+                                  )}
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-6">
+                                  <div className="space-y-4">
+                                    <div>
+                                      <p className="text-sm text-muted-foreground mb-1">Redistributable Quantity</p>
+                                      <p className="text-2xl font-bold text-foreground">
+                                        {financialStatus.redistributableQty.toFixed(0)} {product.unit}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-muted-foreground mb-1">Expected Revenue</p>
+                                      <p className="text-2xl font-bold text-success">
+                                        ₹{financialStatus.expectedRevenue.toFixed(0)}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground mt-1">
+                                        @ ₹{product.suggested_selling_price}/{product.unit}
+                                      </p>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <p className="text-muted-foreground mb-1">Expected Revenue:</p>
-                                    <p className="font-semibold text-success">
-                                      ₹{financialStatus.expectedRevenue.toFixed(2)}
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <p className="text-muted-foreground mb-1">Original Cost:</p>
-                                    <p className="font-semibold">₹{financialStatus.originalCost.toFixed(2)}</p>
+                                  
+                                  <div className="space-y-4">
+                                    <div>
+                                      <p className="text-sm text-muted-foreground mb-1">Original Cost</p>
+                                      <p className="text-xl font-semibold text-foreground">
+                                        ₹{financialStatus.originalCost.toFixed(0)}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-muted-foreground mb-1">Redistribution Cost</p>
+                                      <p className="text-xl font-semibold text-foreground">
+                                        ₹{financialStatus.redistributionCost.toFixed(0)}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground mt-1">
+                                        (Logistics + Misc fees)
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="pt-2 border-t border-border">
-                                  <p className="font-semibold">
-                                    {financialStatus.breakEven ? "Break-even" : financialStatus.isProfitable ? "Profitable" : "Loss"}
-                                  </p>
+
+                                <div className="pt-4 border-t border-border">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-muted-foreground">Net Profit/Loss</span>
+                                    <span className={`text-2xl font-bold ${
+                                      financialStatus.isProfitable ? "text-success" : 
+                                      financialStatus.breakEven ? "text-foreground" : "text-destructive"
+                                    }`}>
+                                      {financialStatus.netProfit >= 0 ? "+" : ""}₹{financialStatus.netProfit.toFixed(0)}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
 
                               {isOverThreshold && (
-                                <Alert className="border-warning bg-warning/10">
-                                  <AlertTriangle className="w-4 h-4 text-warning" />
+                                <Alert className={financialStatus.isProfitable ? "border-success bg-success/10" : "border-warning bg-warning/10"}>
+                                  <AlertTriangle className={`w-4 h-4 ${financialStatus.isProfitable ? "text-success" : "text-warning"}`} />
                                   <AlertDescription className="text-sm text-foreground">
-                                    You're {Math.round((product.quantity || 0) - product.over_supply_limit)}
-                                    {product.unit} over your set threshold. You can prevent spoilage, but may
-                                    incur a ₹{Math.abs(financialStatus.netProfit).toFixed(0)}{" "}
-                                    {financialStatus.isProfitable ? "gain" : "loss"}. Proceed?
+                                    You're {Math.round(financialStatus.redistributableQty)} {product.unit} over your set threshold. 
+                                    Redistributing can prevent spoilage and will result in a{" "}
+                                    <span className={financialStatus.isProfitable ? "text-success font-semibold" : "text-destructive font-semibold"}>
+                                      ₹{Math.abs(financialStatus.netProfit).toFixed(0)} {financialStatus.isProfitable ? "gain" : "loss"}
+                                    </span>. Proceed?
                                   </AlertDescription>
                                 </Alert>
                               )}
 
-                              <Button className="w-full" size="lg">
+                              <Button 
+                                className="w-full" 
+                                size="lg"
+                                disabled={!product.eligible_for_redistribution || financialStatus.redistributableQty === 0}
+                                variant={product.eligible_for_redistribution && financialStatus.redistributableQty > 0 ? "default" : "secondary"}
+                              >
                                 <TrendingUp className="w-4 h-4 mr-2" />
-                                Redistribute Now
+                                {!product.eligible_for_redistribution ? "Not Eligible for Redistribution" : 
+                                 financialStatus.redistributableQty === 0 ? "No Excess Stock to Redistribute" :
+                                 "Redistribute Now"}
                               </Button>
                             </div>
                           )}
