@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      kiosk_inventory: {
+        Row: {
+          created_at: string | null
+          id: string
+          kiosk_id: string | null
+          last_updated: string | null
+          product_id: string | null
+          quantity: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          kiosk_id?: string | null
+          last_updated?: string | null
+          product_id?: string | null
+          quantity?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          kiosk_id?: string | null
+          last_updated?: string | null
+          product_id?: string | null
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kiosk_inventory_kiosk_id_fkey"
+            columns: ["kiosk_id"]
+            isOneToOne: false
+            referencedRelation: "kiosks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kiosk_inventory_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kiosks: {
         Row: {
           address: string
@@ -97,43 +139,82 @@ export type Database = {
       }
       products: {
         Row: {
+          acquired_date: string | null
+          acquired_price: number | null
           created_at: string
           depletion_rate: string | null
           eligible_for_redistribution: boolean | null
+          estimated_market_demand: string | null
+          forecasted_daily_requirement: number | null
           id: string
+          market_demand_distance: string | null
+          mrp: number | null
           name: string
+          normal_supply_level: number | null
+          over_supply_limit: number | null
           quantity: number
+          redistributable_quantity: number | null
+          redistribution_cost: number | null
+          redistribution_revenue: number | null
           sku: string
           status: string | null
+          suggested_selling_price: number | null
           supply_level: number | null
+          under_supply_limit: number | null
           unit: string
           unit_price: number
           updated_at: string
         }
         Insert: {
+          acquired_date?: string | null
+          acquired_price?: number | null
           created_at?: string
           depletion_rate?: string | null
           eligible_for_redistribution?: boolean | null
+          estimated_market_demand?: string | null
+          forecasted_daily_requirement?: number | null
           id?: string
+          market_demand_distance?: string | null
+          mrp?: number | null
           name: string
+          normal_supply_level?: number | null
+          over_supply_limit?: number | null
           quantity?: number
+          redistributable_quantity?: number | null
+          redistribution_cost?: number | null
+          redistribution_revenue?: number | null
           sku: string
           status?: string | null
+          suggested_selling_price?: number | null
           supply_level?: number | null
+          under_supply_limit?: number | null
           unit?: string
           unit_price?: number
           updated_at?: string
         }
         Update: {
+          acquired_date?: string | null
+          acquired_price?: number | null
           created_at?: string
           depletion_rate?: string | null
           eligible_for_redistribution?: boolean | null
+          estimated_market_demand?: string | null
+          forecasted_daily_requirement?: number | null
           id?: string
+          market_demand_distance?: string | null
+          mrp?: number | null
           name?: string
+          normal_supply_level?: number | null
+          over_supply_limit?: number | null
           quantity?: number
+          redistributable_quantity?: number | null
+          redistribution_cost?: number | null
+          redistribution_revenue?: number | null
           sku?: string
           status?: string | null
+          suggested_selling_price?: number | null
           supply_level?: number | null
+          under_supply_limit?: number | null
           unit?: string
           unit_price?: number
           updated_at?: string
