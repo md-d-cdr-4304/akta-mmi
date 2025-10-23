@@ -14,7 +14,273 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      kiosks: {
+        Row: {
+          address: string
+          created_at: string
+          email: string | null
+          id: string
+          kiosk_code: string
+          last_activity: string | null
+          manager_name: string | null
+          name: string
+          phone: string | null
+          sku_count: number | null
+          status: string | null
+          total_items: number | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          kiosk_code: string
+          last_activity?: string | null
+          manager_name?: string | null
+          name: string
+          phone?: string | null
+          sku_count?: number | null
+          status?: string | null
+          total_items?: number | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          kiosk_code?: string
+          last_activity?: string | null
+          manager_name?: string | null
+          name?: string
+          phone?: string | null
+          sku_count?: number | null
+          status?: string | null
+          total_items?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      metrics: {
+        Row: {
+          change_amount: number | null
+          change_percentage: number | null
+          current_value: number
+          id: string
+          metric_type: string
+          period: string | null
+          previous_value: number | null
+          recorded_at: string
+        }
+        Insert: {
+          change_amount?: number | null
+          change_percentage?: number | null
+          current_value: number
+          id?: string
+          metric_type: string
+          period?: string | null
+          previous_value?: number | null
+          recorded_at?: string
+        }
+        Update: {
+          change_amount?: number | null
+          change_percentage?: number | null
+          current_value?: number
+          id?: string
+          metric_type?: string
+          period?: string | null
+          previous_value?: number | null
+          recorded_at?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          created_at: string
+          depletion_rate: string | null
+          eligible_for_redistribution: boolean | null
+          id: string
+          name: string
+          quantity: number
+          sku: string
+          status: string | null
+          supply_level: number | null
+          unit: string
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          depletion_rate?: string | null
+          eligible_for_redistribution?: boolean | null
+          id?: string
+          name: string
+          quantity?: number
+          sku: string
+          status?: string | null
+          supply_level?: number | null
+          unit?: string
+          unit_price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          depletion_rate?: string | null
+          eligible_for_redistribution?: boolean | null
+          id?: string
+          name?: string
+          quantity?: number
+          sku?: string
+          status?: string | null
+          supply_level?: number | null
+          unit?: string
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      redistributions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          from_kiosk_id: string | null
+          id: string
+          priority: string | null
+          product_id: string | null
+          quantity: number
+          reason: string | null
+          status: string | null
+          to_kiosk_id: string | null
+          unit: string
+          value_recovered: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          from_kiosk_id?: string | null
+          id?: string
+          priority?: string | null
+          product_id?: string | null
+          quantity: number
+          reason?: string | null
+          status?: string | null
+          to_kiosk_id?: string | null
+          unit: string
+          value_recovered?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          from_kiosk_id?: string | null
+          id?: string
+          priority?: string | null
+          product_id?: string | null
+          quantity?: number
+          reason?: string | null
+          status?: string | null
+          to_kiosk_id?: string | null
+          unit?: string
+          value_recovered?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redistributions_from_kiosk_id_fkey"
+            columns: ["from_kiosk_id"]
+            isOneToOne: false
+            referencedRelation: "kiosks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redistributions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "redistributions_to_kiosk_id_fkey"
+            columns: ["to_kiosk_id"]
+            isOneToOne: false
+            referencedRelation: "kiosks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          blockchain_ref: string | null
+          created_at: string
+          from_kiosk_id: string | null
+          id: string
+          product_id: string | null
+          quantity: number
+          redistribution_id: string | null
+          status: string | null
+          to_kiosk_id: string | null
+          tx_id: string
+          unit: string
+          value: number | null
+        }
+        Insert: {
+          blockchain_ref?: string | null
+          created_at?: string
+          from_kiosk_id?: string | null
+          id?: string
+          product_id?: string | null
+          quantity: number
+          redistribution_id?: string | null
+          status?: string | null
+          to_kiosk_id?: string | null
+          tx_id: string
+          unit: string
+          value?: number | null
+        }
+        Update: {
+          blockchain_ref?: string | null
+          created_at?: string
+          from_kiosk_id?: string | null
+          id?: string
+          product_id?: string | null
+          quantity?: number
+          redistribution_id?: string | null
+          status?: string | null
+          to_kiosk_id?: string | null
+          tx_id?: string
+          unit?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_from_kiosk_id_fkey"
+            columns: ["from_kiosk_id"]
+            isOneToOne: false
+            referencedRelation: "kiosks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_redistribution_id_fkey"
+            columns: ["redistribution_id"]
+            isOneToOne: false
+            referencedRelation: "redistributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_to_kiosk_id_fkey"
+            columns: ["to_kiosk_id"]
+            isOneToOne: false
+            referencedRelation: "kiosks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
