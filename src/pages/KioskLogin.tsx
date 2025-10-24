@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -119,15 +119,15 @@ export default function KioskLogin() {
           <div className="mt-6 pt-6 border-t border-border/50 space-y-2 text-center">
             <p className="text-sm text-muted-foreground">
               Admin user?{" "}
-              <a href="/admin-login" className="text-primary font-medium hover:underline transition-all">
+              <Link to="/admin-login" className="text-primary font-medium hover:underline transition-all">
                 Sign in here
-              </a>
+              </Link>
             </p>
             <p className="text-sm text-muted-foreground">
               Need demo users?{" "}
-              <a href="/demo-setup" className="text-primary font-medium hover:underline transition-all">
+              <Link to="/demo-setup" className="text-primary font-medium hover:underline transition-all">
                 Set up demo accounts
-              </a>
+              </Link>
             </p>
           </div>
         </div>
