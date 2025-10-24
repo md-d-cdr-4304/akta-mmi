@@ -30,19 +30,19 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-gradient-soft">
         <AppSidebar />
         
         <div className="flex-1 flex flex-col">
-          <header className="h-20 border-b border-border/30 bg-card/60 flex items-center justify-between px-8 sticky top-0 z-10 backdrop-blur-xl shadow-sm">
+          <header className="h-20 border-b border-border/30 bg-card/80 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
             <div className="flex items-center gap-6 flex-1">
-              <SidebarTrigger className="text-foreground hover:text-primary transition-colors" />
-              <img src={logo} alt="ÄKTA Logo" className="h-10 w-10 object-contain" />
+              <SidebarTrigger className="text-foreground hover:text-primary transition-all hover:scale-110" />
+              <img src={logo} alt="ÄKTA Logo" className="h-10 w-10 object-contain rounded-xl hover-lift" />
               <div className="max-w-xl flex-1">
                 <Input
                   type="search"
                   placeholder="Search inventory, SKUs, locations..."
-                  className="w-full shadow-sm"
+                  className="w-full shadow-md"
                 />
               </div>
             </div>
@@ -50,16 +50,16 @@ export function Layout({ children }: LayoutProps) {
             <div className="flex items-center gap-3">
               <ThemeToggle />
               
-              <button className="relative p-2.5 hover:bg-accent/30 rounded-xl transition-all duration-200 hover:scale-105">
-                <Bell className="w-5 h-5 text-foreground/80" />
-                <Badge className="absolute -top-0.5 -right-0.5 w-5 h-5 flex items-center justify-center p-0 bg-destructive text-destructive-foreground text-xs shadow-sm">
+              <button className="relative p-2.5 hover:bg-accent/40 rounded-xl transition-all duration-300 hover:scale-110 group">
+                <Bell className="w-5 h-5 text-foreground/80 group-hover:text-primary transition-colors" />
+                <Badge className="absolute -top-0.5 -right-0.5 w-5 h-5 flex items-center justify-center p-0 bg-destructive text-destructive-foreground text-xs shadow-md animate-pulse">
                   4
                 </Badge>
               </button>
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="p-2.5 hover:bg-accent/30 rounded-xl transition-all duration-200 hover:scale-105">
+                  <button className="p-2.5 hover:bg-accent/40 rounded-xl transition-all duration-300 hover:scale-110">
                     <User className="w-5 h-5 text-foreground/80" />
                   </button>
                 </DropdownMenuTrigger>

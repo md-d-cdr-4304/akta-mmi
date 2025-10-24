@@ -35,19 +35,25 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' }}>
-      <div className="w-full max-w-md p-8 bg-card rounded-2xl shadow-xl">
+    <div className="min-h-screen flex items-center justify-center gradient-hero relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
+      
+      <div className="w-full max-w-md p-10 glass-effect rounded-3xl shadow-glow backdrop-blur-xl relative z-10 animate-fade-in-up">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-4">
-            <Package className="w-8 h-8 text-primary-foreground" />
+          <div className="w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-6 shadow-lg hover-lift">
+            <Package className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Admin Portal</h1>
-          <p className="text-muted-foreground text-sm mt-2">Sign in to manage your inventory system</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Portal</h1>
+          <p className="text-white/80 text-sm">Sign in to manage your inventory system</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+            <label htmlFor="email" className="block text-sm font-semibold text-white mb-2">
               Email Address
             </label>
             <Input
@@ -57,11 +63,12 @@ export default function AdminLogin() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/15 focus:border-white/40"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
+            <label htmlFor="password" className="block text-sm font-semibold text-white mb-2">
               Password
             </label>
             <div className="relative">
@@ -72,41 +79,46 @@ export default function AdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:bg-white/15 focus:border-white/40"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            className="w-full bg-white text-primary hover:bg-white/90 font-semibold shadow-lg hover-lift" 
+            disabled={isLoading}
+          >
             {isLoading ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="mt-8 text-center space-y-3">
+          <p className="text-sm text-white/80">
             Kiosk user?{' '}
-            <a href="/kiosk-login" className="text-primary hover:underline font-medium">
+            <a href="/kiosk-login" className="text-white font-semibold hover:underline transition-all">
               Sign in here
             </a>
           </p>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-sm text-white/80">
             Need demo users?{' '}
-            <a href="/demo-setup" className="text-primary hover:underline font-medium">
+            <a href="/demo-setup" className="text-white font-semibold hover:underline transition-all">
               Set up demo accounts
             </a>
           </p>
         </div>
 
-        <div className="mt-6 p-4 bg-muted/30 rounded-xl">
-          <p className="text-xs text-muted-foreground font-medium mb-1">Demo Credentials:</p>
-          <p className="text-xs text-muted-foreground">Email: admin@akta.com</p>
-          <p className="text-xs text-muted-foreground">Password: admin123</p>
+        <div className="mt-6 p-5 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+          <p className="text-xs text-white/90 font-semibold mb-2">Demo Credentials:</p>
+          <p className="text-xs text-white/80">Email: admin@akta.com</p>
+          <p className="text-xs text-white/80">Password: admin123</p>
         </div>
       </div>
     </div>
