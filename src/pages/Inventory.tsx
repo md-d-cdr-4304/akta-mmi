@@ -13,15 +13,19 @@ import {
   TrendingDown,
   Minus,
   Search,
-  Filter
+  Filter,
+  CheckCircle2,
+  XCircle
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RedistributeDialog } from "@/components/RedistributeDialog";
 import { ItemSettingsDialog } from "@/components/ItemSettingsDialog";
+import { toast } from "@/hooks/use-toast";
+import { z } from "zod";
 
 interface Product {
   id: string;
@@ -55,6 +59,7 @@ interface KioskInventory {
 }
 
 export default function Inventory() {
+  const queryClient = useQueryClient();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -62,6 +67,12 @@ export default function Inventory() {
     open: boolean;
     product: Product | null;
   }>({ open: false, product: null });
+
+  // Validation schema for eligibility update
+  const eligibilitySchema = z.object({
+    productId: z.string().uuid("Invalid product ID"),
+    eligible: z.boolean(),
+  });
 
   const { data: products, isLoading } = useQuery({
     queryKey: ["products"],
@@ -186,16 +197,51 @@ export default function Inventory() {
     };
   };
 
+  const updateEligibilityMutation = useMutation({
+    mutationFn: async ({ productId, eligible }: { productId: string; eligible: boolean }) => {
+      // Validate input
+      try {
+        eligibilitySchema.parse({ productId, eligible });
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          throw new Error(error.errors[0].message);
+        }
+        throw error;
+      }
+
+      const { error } = await supabase
+        .from("products")
+        .update({ eligible_for_redistribution: eligible })
+        .eq("id", productId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Item eligibility updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update eligibility",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEligibilityChange = (productId: string, eligible: string) => {
+    const isEligible = eligible === "eligible";
+    updateEligibilityMutation.mutate({ productId, eligible: isEligible });
+  };
+
   const toggleEligibility = async (productId: string, currentStatus: boolean | null) => {
-    const { error } = await supabase
-      .from("products")
-      .update({ eligible_for_redistribution: !currentStatus })
-      .eq("id", productId);
-    
-    if (!error) {
-      // Refresh the products data
-      window.location.reload();
-    }
+    updateEligibilityMutation.mutate({ 
+      productId, 
+      eligible: !currentStatus 
+    });
   };
 
   const filteredProducts = products?.filter((product) => {
@@ -311,14 +357,45 @@ export default function Inventory() {
                               {(() => {
                                 const isEligible = product.quantity > product.over_supply_limit;
                                 return (
-                                  <Button 
-                                    size="sm"
-                                    variant={isEligible ? "default" : "secondary"}
-                                    className="gap-2"
-                                    disabled={!isEligible}
-                                  >
-                                    {isEligible ? "Redistribute" : "No Action"}
-                                  </Button>
+                                  <div className="flex items-center gap-2">
+                                    <Select
+                                      value={
+                                        product.eligible_for_redistribution 
+                                          ? "eligible" 
+                                          : "not-eligible"
+                                      }
+                                      onValueChange={(value) => handleEligibilityChange(product.id, value)}
+                                      disabled={updateEligibilityMutation.isPending}
+                                    >
+                                      <SelectTrigger className="w-[150px] h-9">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="eligible">
+                                          <div className="flex items-center gap-2">
+                                            <CheckCircle2 className="w-4 h-4 text-success" />
+                                            <span>Eligible</span>
+                                          </div>
+                                        </SelectItem>
+                                        <SelectItem value="not-eligible">
+                                          <div className="flex items-center gap-2">
+                                            <XCircle className="w-4 h-4 text-muted-foreground" />
+                                            <span>Not Eligible</span>
+                                          </div>
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    {isEligible && (
+                                      <Button 
+                                        size="sm"
+                                        variant="default"
+                                        className="gap-2"
+                                        disabled={!isEligible}
+                                      >
+                                        Redistribute
+                                      </Button>
+                                    )}
+                                  </div>
                                 );
                               })()}
                             </TableCell>
@@ -392,23 +469,43 @@ export default function Inventory() {
                             </div>
 
                             <div className="flex items-center gap-4">
-                              <div
-                                className="flex items-center gap-2"
-                              >
-                                <Button
-                                  size="sm"
-                                  variant={isOverThreshold ? "default" : "secondary"}
-                                  className="gap-2"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleEligibility(product.id, product.eligible_for_redistribution);
-                                  }}
+                              <div className="flex flex-col gap-2">
+                                <Select
+                                  value={
+                                    product.eligible_for_redistribution 
+                                      ? "eligible" 
+                                      : "not-eligible"
+                                  }
+                                  onValueChange={(value) => handleEligibilityChange(product.id, value)}
+                                  disabled={updateEligibilityMutation.isPending}
                                 >
-                                  <div className={`w-2 h-2 rounded-full ${
+                                  <SelectTrigger className="w-[180px] h-9">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="eligible">
+                                      <div className="flex items-center gap-2">
+                                        <CheckCircle2 className="w-4 h-4 text-success" />
+                                        <span>Eligible</span>
+                                      </div>
+                                    </SelectItem>
+                                    <SelectItem value="not-eligible">
+                                      <div className="flex items-center gap-2">
+                                        <XCircle className="w-4 h-4 text-muted-foreground" />
+                                        <span>Not Eligible</span>
+                                      </div>
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Badge 
+                                  variant={isOverThreshold ? "default" : "secondary"}
+                                  className="text-xs justify-center"
+                                >
+                                  <div className={`w-2 h-2 rounded-full mr-1 ${
                                     isOverThreshold ? "bg-success" : "bg-muted"
                                   }`} />
-                                  {isOverThreshold ? "Eligible" : "Not Eligible"}
-                                </Button>
+                                  {isOverThreshold ? "Over Threshold" : "Within Range"}
+                                </Badge>
                               </div>
 
                               <div
