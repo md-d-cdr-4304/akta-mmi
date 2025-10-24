@@ -7,60 +7,63 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-4xl font-bold text-foreground mb-3">Dashboard</h1>
-        <p className="text-muted-foreground text-lg">Overview of your inventory and redistribution metrics</p>
+        <h1 className="text-4xl font-heading font-bold text-foreground mb-3 animate-fade-in-up">Dashboard</h1>
+        <p className="text-muted-foreground text-lg animate-fade-in">Overview of your inventory and redistribution metrics</p>
       </div>
 
       {/* Top Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="hover:shadow-xl transition-all duration-300">
-          <CardContent className="pt-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
+        <Card className="hover-lift overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+          <CardContent className="pt-8 relative z-10">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-2 font-medium">Inventory</p>
-                <p className="text-4xl font-bold mb-2">28 SKUs</p>
+                <p className="text-4xl font-heading font-bold mb-2">28 SKUs</p>
                 <p className="text-sm text-success flex items-center gap-1.5">
                   <TrendingUp className="w-4 h-4" />
                   <span className="font-semibold">+1 this week</span>
                 </p>
               </div>
-              <div className="w-16 h-16 bg-gradient-accent rounded-2xl flex items-center justify-center shadow-md">
+              <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-lg hover-scale">
                 <Package className="w-8 h-8 text-primary-foreground" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-xl transition-all duration-300">
-          <CardContent className="pt-8">
+        <Card className="hover-lift overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+          <CardContent className="pt-8 relative z-10">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-2 font-medium">Total Value</p>
-                <p className="text-4xl font-bold mb-2">₹2.9L</p>
+                <p className="text-4xl font-heading font-bold mb-2">₹2.9L</p>
                 <p className="text-sm text-success flex items-center gap-1.5">
                   <TrendingUp className="w-4 h-4" />
                   <span className="font-semibold">+5% growth</span>
                 </p>
               </div>
-              <div className="w-16 h-16 bg-gradient-accent rounded-2xl flex items-center justify-center shadow-md">
+              <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-lg hover-scale">
                 <Wallet className="w-8 h-8 text-primary-foreground" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-xl transition-all duration-300">
-          <CardContent className="pt-8">
+        <Card className="hover-lift overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+          <CardContent className="pt-8 relative z-10">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-2 font-medium">This Month</p>
-                <p className="text-4xl font-bold mb-2">₹45.7K</p>
+                <p className="text-4xl font-heading font-bold mb-2">₹45.7K</p>
                 <p className="text-sm text-success flex items-center gap-1.5">
                   <TrendingUp className="w-4 h-4" />
                   <span className="font-semibold">+₹8.2K</span>
                 </p>
               </div>
-              <div className="w-16 h-16 bg-gradient-accent rounded-2xl flex items-center justify-center shadow-md">
+              <div className="w-16 h-16 bg-gradient-primary rounded-2xl flex items-center justify-center shadow-lg hover-scale">
                 <DollarSign className="w-8 h-8 text-primary-foreground" />
               </div>
             </div>
@@ -70,25 +73,26 @@ export default function Dashboard() {
 
       {/* Revenue and Redistribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-success/5 border-success/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-success">
-              <DollarSign className="w-5 h-5" />
+        <Card className="bg-gradient-to-br from-success/10 via-success/5 to-background border-success/30 hover-lift overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-success/10 rounded-full blur-3xl"></div>
+          <CardHeader className="relative z-10">
+            <CardTitle className="flex items-center gap-2 text-success font-heading">
+              <DollarSign className="w-6 h-6" />
               Revenue Generated
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-success mb-2">₹45.7K</p>
+          <CardContent className="relative z-10">
+            <p className="text-5xl font-heading font-bold text-success mb-2">₹45.7K</p>
             <p className="text-sm text-muted-foreground mb-6">This month from redistribution</p>
             
             <div className="grid grid-cols-2 gap-4">
-              <div>
+              <div className="p-4 rounded-xl bg-success/10 border border-success/20">
                 <p className="text-sm text-muted-foreground mb-1">Cost Savings</p>
-                <p className="text-2xl font-semibold text-success">₹12,400</p>
+                <p className="text-2xl font-heading font-semibold text-success">₹12,400</p>
               </div>
-              <div>
+              <div className="p-4 rounded-xl bg-success/10 border border-success/20">
                 <p className="text-sm text-muted-foreground mb-1">Efficiency Gain</p>
-                <p className="text-2xl font-semibold text-success">+18%</p>
+                <p className="text-2xl font-heading font-semibold text-success">+18%</p>
               </div>
             </div>
           </CardContent>

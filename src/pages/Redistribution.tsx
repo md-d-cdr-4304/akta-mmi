@@ -118,23 +118,24 @@ export default function Redistribution() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Redistribution Management</h1>
+        <h1 className="text-4xl font-heading font-bold text-foreground mb-2">Redistribution Management</h1>
         <p className="text-muted-foreground">Review and approve kiosk redistribution requests</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statsCards.map((stat) => (
-          <Card key={stat.title}>
-            <CardContent className="pt-6">
+        {statsCards.map((stat, index) => (
+          <Card key={stat.title} className="hover-lift overflow-hidden relative" style={{ animationDelay: `${index * 0.1}s` }}>
+            <div className="absolute top-0 right-0 w-24 h-24 opacity-10 rounded-full blur-2xl" style={{ background: `hsl(var(--${stat.color.split(' ')[0].replace('bg-', '')}))` }}></div>
+            <CardContent className="pt-6 relative z-10">
               <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 rounded-lg flex items-center justify-center ${stat.color}`}>
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${stat.color} shadow-md hover-scale`}>
                   <stat.icon className="w-7 h-7" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">{stat.title}</p>
-                  <p className="text-3xl font-bold">{stat.value}</p>
+                  <p className="text-3xl font-heading font-bold">{stat.value}</p>
                 </div>
               </div>
             </CardContent>
@@ -156,42 +157,43 @@ export default function Redistribution() {
             <div className="text-center text-muted-foreground py-8">No pending requests</div>
           ) : (
             <div className="space-y-4">
-              {redistributions.map((request: any) => (
-                <Card key={request.id} className="border-2">
-                  <CardContent className="pt-6">
+              {redistributions.map((request: any, index: number) => (
+                <Card key={request.id} className="border-2 hover-lift overflow-hidden relative" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+                  <CardContent className="pt-6 relative z-10">
                     <div className="space-y-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4 flex-1">
-                          <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <TrendingUp className="w-5 h-5 text-accent" />
+                          <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center flex-shrink-0 shadow-md hover-scale">
+                            <TrendingUp className="w-6 h-6 text-primary-foreground" />
                           </div>
                           
                           <div className="flex-1 space-y-3">
                             <div className="flex items-center gap-3 flex-wrap">
-                              <span className="font-semibold">Requesting Items</span>
+                              <span className="font-heading font-semibold text-base">Requesting Items</span>
                               <Badge variant="secondary" className={`${
                                 request.priority === "High Priority" 
-                                  ? "bg-destructive/10 text-destructive border-destructive/20" 
-                                  : "bg-warning/10 text-warning border-warning/20"
+                                  ? "bg-destructive/15 text-destructive border-destructive/30 font-semibold" 
+                                  : "bg-warning/15 text-warning border-warning/30 font-semibold"
                               }`}>
                                 {request.priority}
                               </Badge>
-                              <span className="text-sm text-muted-foreground">#{request.id.slice(0, 8)}</span>
+                              <span className="text-sm text-muted-foreground font-mono">#{request.id.slice(0, 8)}</span>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              <div>
-                                <p className="font-semibold text-sm mb-1">{request.to_kiosk?.name || "Unknown Kiosk"}</p>
-                                <p className="text-sm text-muted-foreground">{request.to_kiosk?.kiosk_code || "N/A"}</p>
+                              <div className="p-3 rounded-lg bg-accent/20 border border-accent/30">
+                                <p className="font-heading font-semibold text-sm mb-1">{request.to_kiosk?.name || "Unknown Kiosk"}</p>
+                                <p className="text-xs text-muted-foreground font-mono">{request.to_kiosk?.kiosk_code || "N/A"}</p>
                               </div>
                               
-                              <div>
-                                <p className="font-semibold text-sm mb-1">{request.products?.name || "Unknown Product"}</p>
-                                <p className="text-sm text-muted-foreground">Quantity: {request.quantity} {request.unit}</p>
+                              <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                                <p className="font-heading font-semibold text-sm mb-1">{request.products?.name || "Unknown Product"}</p>
+                                <p className="text-xs text-muted-foreground">Quantity: <span className="font-semibold">{request.quantity} {request.unit}</span></p>
                               </div>
                               
-                              <div>
-                                <p className="text-sm text-muted-foreground mb-1">Created</p>
+                              <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                                <p className="text-xs text-muted-foreground mb-1">Created</p>
                                 <p className="text-sm font-medium">{new Date(request.created_at).toLocaleString()}</p>
                               </div>
                             </div>
