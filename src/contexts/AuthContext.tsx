@@ -61,24 +61,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserRoleAndKiosk = async (userId: string) => {
     try {
       // Fetch user role
-      const { data: roleData } = await supabase
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
-      if (roleData) {
+      if (roleError) {
+        console.error('Error fetching role:', roleError);
+      } else if (roleData) {
         setUserRole(roleData.role as UserRole);
       }
 
       // Fetch profile to get kiosk_id
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('kiosk_id')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
-      if (profileData?.kiosk_id) {
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+      } else if (profileData?.kiosk_id) {
         setKioskId(profileData.kiosk_id);
       }
     } catch (error) {
