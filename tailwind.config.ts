@@ -75,11 +75,13 @@ export default {
         'gradient-primary': 'var(--gradient-primary)',
         'gradient-soft': 'var(--gradient-soft)',
         'gradient-accent': 'var(--gradient-accent)',
+        'gradient-card': 'var(--gradient-card)',
       },
       boxShadow: {
         'sm': 'var(--shadow-sm)',
         'md': 'var(--shadow-md)',
         'lg': 'var(--shadow-lg)',
+        'xl': 'var(--shadow-xl)',
       },
       keyframes: {
         "accordion-down": {
