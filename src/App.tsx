@@ -22,6 +22,7 @@ import KioskInventory from "./pages/kiosk/KioskInventory";
 import KioskRequests from "./pages/kiosk/KioskRequests";
 import KioskTransactions from "./pages/kiosk/KioskTransactions";
 import KioskSettings from "./pages/kiosk/KioskSettings";
+import KioskThresholdSettings from "./pages/kiosk/KioskThresholdSettings";
 import DemoSetup from "./pages/DemoSetup";
 import NotFound from "./pages/NotFound";
 
@@ -102,6 +103,11 @@ const App = () => (
               <Route path="/kiosk/settings" element={
                 <ProtectedRoute requireRole="kiosk_user">
                   <KioskLayout><KioskSettings /></KioskLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/kiosk/threshold-settings" element={
+                <ProtectedRoute requireRole="kiosk_user">
+                  <KioskLayout><KioskThresholdSettings /></KioskLayout>
                 </ProtectedRoute>
               } />
               

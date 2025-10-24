@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RequestsPopover } from "@/components/RequestsPopover";
-import { User, LogOut, LayoutDashboard, Package, TrendingUp, Receipt, Settings } from "lucide-react";
+import { User, LogOut, LayoutDashboard, Package, TrendingUp, Receipt, Settings, Sliders } from "lucide-react";
 import logo from "@/assets/akta-logo.jpeg";
 
 interface KioskLayoutProps {
@@ -26,6 +26,7 @@ export function KioskLayout({ children }: KioskLayoutProps) {
     { icon: Package, label: 'Inventory', path: '/kiosk/inventory' },
     { icon: TrendingUp, label: 'Requests', path: '/kiosk/requests' },
     { icon: Receipt, label: 'Transactions', path: '/kiosk/transactions' },
+    { icon: Sliders, label: 'Thresholds', path: '/kiosk/threshold-settings' },
     { icon: Settings, label: 'Settings', path: '/kiosk/settings' },
   ];
 
