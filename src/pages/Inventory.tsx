@@ -241,6 +241,84 @@ export default function Inventory() {
           </div>
         </div>
 
+        <TabsContent value="table" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Combined Inventory (All Kiosks)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="text-center py-12 text-muted-foreground">Loading inventory...</div>
+              ) : (
+                <>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Item Name</TableHead>
+                        <TableHead>Total Quantity</TableHead>
+                        <TableHead>Kiosk Distribution</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Last Updated</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredProducts?.map((product) => {
+                        const kioskData = kioskInventoryMap?.[product.id] || [];
+                        const supplyStatus = getSupplyStatus(product);
+                        
+                        return (
+                          <TableRow key={product.id}>
+                            <TableCell className="font-medium">{product.name}</TableCell>
+                            <TableCell>
+                              <span className="font-semibold">{product.quantity}</span>{" "}
+                              <span className="text-muted-foreground text-sm">{product.unit}</span>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1 text-sm">
+                                {kioskData.slice(0, 3).map((kiosk) => (
+                                  <div key={kiosk.kiosk_id}>
+                                    <span className="font-medium">{kiosk.kiosk_code}:</span>{" "}
+                                    <span>{kiosk.quantity} {product.unit}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={
+                                  product.depletion_rate === "High depletion" ? "destructive" :
+                                  product.depletion_rate === "Medium depletion" ? "secondary" :
+                                  "default"
+                                }
+                              >
+                                {product.depletion_rate || "Normal"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {new Date(product.updated_at).toLocaleDateString()} {new Date(product.updated_at).toLocaleTimeString()}
+                            </TableCell>
+                            <TableCell>
+                              <Button 
+                                size="sm"
+                                variant={product.eligible_for_redistribution ? "default" : "secondary"}
+                                className="gap-2"
+                                disabled={!product.eligible_for_redistribution}
+                              >
+                                {product.eligible_for_redistribution ? "Redistribute" : "No Action"}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="cards" className="space-y-4">
           <div>
             <h2 className="text-xl font-bold text-foreground mb-2">
