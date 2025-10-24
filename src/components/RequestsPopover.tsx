@@ -4,13 +4,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { Bell, Send, TrendingDown, ExternalLink } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Bell, Send, TrendingDown, ExternalLink, CheckCircle2, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 export function RequestsPopover() {
   const { kioskId } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: requests } = useQuery({
     queryKey: ["kiosk-requests-notifications", kioskId],
@@ -32,6 +34,42 @@ export function RequestsPopover() {
 
       if (error) throw error;
       return data;
+    },
+  });
+
+  const approveRequestMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("redistributions")
+        .update({ status: "approved", completed_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Request approved successfully" });
+      queryClient.invalidateQueries({ queryKey: ["kiosk-requests-notifications", kioskId] });
+      queryClient.invalidateQueries({ queryKey: ["kiosk-redistributions", kioskId] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to approve request", variant: "destructive" });
+    },
+  });
+
+  const rejectRequestMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("redistributions")
+        .update({ status: "rejected" })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Request rejected" });
+      queryClient.invalidateQueries({ queryKey: ["kiosk-requests-notifications", kioskId] });
+      queryClient.invalidateQueries({ queryKey: ["kiosk-redistributions", kioskId] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to reject request", variant: "destructive" });
     },
   });
 
@@ -82,8 +120,7 @@ export function RequestsPopover() {
                 return (
                   <div
                     key={request.id}
-                    className="p-3 mb-2 rounded-lg border hover:bg-accent/20 transition-colors cursor-pointer"
-                    onClick={() => navigate("/kiosk/requests")}
+                    className="p-3 mb-2 rounded-lg border hover:bg-accent/20 transition-colors"
                   >
                     <div className="flex items-start gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
@@ -126,6 +163,42 @@ export function RequestsPopover() {
                         {request.reason}
                       </p>
                     )}
+
+                    <div className="flex gap-2 mt-3 pl-11">
+                      <Button
+                        size="sm"
+                        className="h-7 text-xs bg-success hover:bg-success/90 flex-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          approveRequestMutation.mutate(request.id);
+                        }}
+                        disabled={approveRequestMutation.isPending}
+                      >
+                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="h-7 text-xs flex-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          rejectRequestMutation.mutate(request.id);
+                        }}
+                        disabled={rejectRequestMutation.isPending}
+                      >
+                        <XCircle className="w-3 h-3 mr-1" />
+                        Reject
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs"
+                        onClick={() => navigate("/kiosk/requests")}
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
                 );
               })}
