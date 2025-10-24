@@ -6,6 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Package, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import aktaLogo from '@/assets/akta-logo.jpeg';
+import { z } from 'zod';
+
+const loginSchema = z.object({
+  email: z.string()
+    .trim()
+    .email({ message: "Invalid email address" })
+    .max(255, { message: "Email too long" }),
+  password: z.string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .max(100, { message: "Password too long" })
+});
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -17,10 +28,17 @@ export default function AdminLogin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const validation = loginSchema.safeParse({ email, password });
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await signIn(validation.data.email, validation.data.password);
       
       if (error) {
         toast.error(error.message || 'Invalid credentials');
@@ -123,7 +141,7 @@ export default function AdminLogin() {
         {/* Demo credentials */}
         <div className="mt-6 p-4 bg-accent/30 backdrop-blur-sm rounded-xl border border-border/30 text-center">
           <p className="text-xs text-muted-foreground font-medium mb-1">Demo Credentials</p>
-          <p className="text-xs text-foreground/80">admin@akta.com / admin123</p>
+          <p className="text-xs text-foreground/80">admin@akta.com / admin123456</p>
         </div>
       </div>
     </div>

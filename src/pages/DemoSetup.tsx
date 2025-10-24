@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { z } from 'zod';
+
+const signupSchema = z.object({
+  email: z.string().trim().email().max(255),
+  password: z.string().min(8).max(100),
+  full_name: z.string().trim().min(1).max(100)
+});
 
 export default function DemoSetup() {
   const [isCreating, setIsCreating] = useState(false);
@@ -11,14 +18,26 @@ export default function DemoSetup() {
   const createDemoUsers = async () => {
     setIsCreating(true);
     try {
+      // Validate admin credentials
+      const adminValidation = signupSchema.safeParse({
+        email: 'admin@akta.com',
+        password: 'admin123456',
+        full_name: 'Admin User'
+      });
+
+      if (!adminValidation.success) {
+        throw new Error('Invalid admin credentials format');
+      }
+
       // Create admin user
       const { data: adminData, error: adminError } = await supabase.auth.signUp({
-        email: 'admin@akta.com',
-        password: 'admin123',
+        email: adminValidation.data.email,
+        password: adminValidation.data.password,
         options: {
           data: {
-            full_name: 'Admin User'
-          }
+            full_name: adminValidation.data.full_name
+          },
+          emailRedirectTo: `${window.location.origin}/admin-login`
         }
       });
 
@@ -40,13 +59,24 @@ export default function DemoSetup() {
       ];
 
       for (const kiosk of kioskUsers) {
-        const { data: kioskData, error: kioskError } = await supabase.auth.signUp({
+        const kioskValidation = signupSchema.safeParse({
           email: kiosk.email,
-          password: 'kiosk123',
+          password: 'kiosk123456',
+          full_name: kiosk.name
+        });
+
+        if (!kioskValidation.success) {
+          throw new Error(`Invalid kiosk credentials format for ${kiosk.email}`);
+        }
+
+        const { data: kioskData, error: kioskError } = await supabase.auth.signUp({
+          email: kioskValidation.data.email,
+          password: kioskValidation.data.password,
           options: {
             data: {
-              full_name: kiosk.name
-            }
+              full_name: kioskValidation.data.full_name
+            },
+            emailRedirectTo: `${window.location.origin}/kiosk-login`
           }
         });
 
@@ -89,8 +119,8 @@ export default function DemoSetup() {
 
         <div className="mt-6 p-4 bg-muted/30 rounded-xl text-left">
           <p className="text-xs text-muted-foreground font-medium mb-2">Demo credentials that will be created:</p>
-          <p className="text-xs text-muted-foreground">Admin: admin@akta.com / admin123</p>
-          <p className="text-xs text-muted-foreground">Kiosk: kiosk001@akta.com / kiosk123</p>
+          <p className="text-xs text-muted-foreground">Admin: admin@akta.com / admin123456</p>
+          <p className="text-xs text-muted-foreground">Kiosk: kiosk001@akta.com / kiosk123456</p>
         </div>
       </div>
     </div>
