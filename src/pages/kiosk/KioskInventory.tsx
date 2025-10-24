@@ -1,20 +1,82 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, TrendingDown, TrendingUp, RefreshCw, Plus, Settings } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { RedistributeDialog } from "@/components/RedistributeDialog";
+import { ItemSettingsDialog } from "@/components/ItemSettingsDialog";
+
+interface InventoryItem {
+  id: string;
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  unit: string;
+  threshold: number;
+  auto_request_enabled: boolean;
+}
 
 export default function KioskInventory() {
-  const inventoryItems = [
-    { name: 'Almond Milk', category: 'Dairy', stock: 28, unit: 'liters', threshold: 20, status: 'Normal', autoRequest: 'Disabled' },
-    { name: 'Baby Spinach', category: 'Vegetables', stock: 200, unit: 'bags', threshold: 20, status: 'Surplus', autoRequest: 'Enabled' },
-    { name: 'Free-Range Eggs', category: 'Dairy', stock: 55, unit: 'dozen', threshold: 40, status: 'Normal', autoRequest: 'Enabled' },
-    { name: 'Greek Yogurt', category: 'Dairy', stock: 120, unit: 'containers', threshold: 25, status: 'Surplus', autoRequest: 'Disabled' },
-    { name: 'Milk Bread', category: 'Bakery', stock: 12, unit: 'loaves', threshold: 8, status: 'Surplus', autoRequest: 'Disabled' },
-    { name: 'Organic Apples', category: 'Fruits', stock: 45, unit: 'kg', threshold: 50, status: 'Low Stock', autoRequest: 'Enabled' },
-    { name: 'Organic Bananas', category: 'Fruits', stock: 60, unit: 'kg', threshold: 40, status: 'Surplus', autoRequest: 'Enabled' },
-  ];
+  const { kioskId } = useAuth();
+  const [redistributeDialog, setRedistributeDialog] = useState<{
+    open: boolean;
+    item: InventoryItem | null;
+  }>({ open: false, item: null });
+  const [settingsDialog, setSettingsDialog] = useState<{
+    open: boolean;
+    item: InventoryItem | null;
+  }>({ open: false, item: null });
+
+  const { data: inventoryItems, isLoading } = useQuery({
+    queryKey: ["kiosk-inventory", kioskId],
+    enabled: !!kioskId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("kiosk_inventory")
+        .select(`
+          id,
+          product_id,
+          quantity,
+          threshold,
+          auto_request_enabled,
+          products (
+            name,
+            unit
+          )
+        `)
+        .eq("kiosk_id", kioskId);
+
+      if (error) throw error;
+      
+      return data.map((item: any) => ({
+        id: item.id,
+        product_id: item.product_id,
+        product_name: item.products.name,
+        quantity: item.quantity,
+        unit: item.products.unit,
+        threshold: item.threshold || 20,
+        auto_request_enabled: item.auto_request_enabled || false,
+      })) as InventoryItem[];
+    },
+  });
+
+  const getStatus = (stock: number, threshold: number) => {
+    if (stock < threshold) return { label: "Low Stock", variant: "destructive" as const };
+    if (stock > threshold * 1.5) return { label: "Surplus", variant: "secondary" as const, className: "bg-warning/20 text-warning" };
+    return { label: "Normal", variant: "default" as const, className: "bg-success/20 text-success" };
+  };
+
+  const stats = {
+    total: inventoryItems?.length || 0,
+    lowStock: inventoryItems?.filter(i => i.quantity < i.threshold).length || 0,
+    surplus: inventoryItems?.filter(i => i.quantity > i.threshold * 1.5).length || 0,
+    autoRequest: inventoryItems?.filter(i => i.auto_request_enabled).length || 0,
+  };
 
   return (
     <div className="space-y-8">
@@ -39,7 +101,7 @@ export default function KioskInventory() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Items</p>
-                <p className="text-2xl font-bold text-foreground">10</p>
+                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
               </div>
             </div>
           </CardContent>
@@ -53,7 +115,7 @@ export default function KioskInventory() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Low Stock</p>
-                <p className="text-2xl font-bold text-foreground">3</p>
+                <p className="text-2xl font-bold text-foreground">{stats.lowStock}</p>
               </div>
             </div>
           </CardContent>
@@ -67,7 +129,7 @@ export default function KioskInventory() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Surplus Items</p>
-                <p className="text-2xl font-bold text-foreground">5</p>
+                <p className="text-2xl font-bold text-foreground">{stats.surplus}</p>
               </div>
             </div>
           </CardContent>
@@ -81,7 +143,7 @@ export default function KioskInventory() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Auto-Request On</p>
-                <p className="text-2xl font-bold text-foreground">6</p>
+                <p className="text-2xl font-bold text-foreground">{stats.autoRequest}</p>
               </div>
             </div>
           </CardContent>
@@ -115,57 +177,103 @@ export default function KioskInventory() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {inventoryItems.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    <div>
-                      <p className="font-semibold text-foreground">{item.name}</p>
-                      <p className="text-sm text-muted-foreground">{item.category}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <p className="font-medium text-foreground">{item.stock} {item.unit}</p>
-                    <p className="text-xs text-muted-foreground">2025-09-26T16:12:14:201746+00:00</p>
-                  </TableCell>
-                  <TableCell className="text-foreground">{item.threshold} {item.unit}</TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={
-                        item.status === 'Low Stock' ? 'destructive' :
-                        item.status === 'Surplus' ? 'secondary' :
-                        'default'
-                      }
-                      className={
-                        item.status === 'Surplus' ? 'bg-warning/20 text-warning' :
-                        item.status === 'Normal' ? 'bg-success/20 text-success' : ''
-                      }
-                    >
-                      {item.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={item.autoRequest === 'Enabled' ? 'default' : 'secondary'}>
-                      {item.autoRequest}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button size="sm" className="bg-primary hover:bg-primary/90">
-                        <RefreshCw className="w-3.5 h-3.5 mr-1" />
-                        Redistribute
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Settings className="w-3.5 h-3.5 mr-1" />
-                        Settings
-                      </Button>
-                    </div>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    Loading inventory...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : inventoryItems?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    No inventory items found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                inventoryItems?.map((item) => {
+                  const status = getStatus(item.quantity, item.threshold);
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-semibold text-foreground">{item.product_name}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <p className="font-medium text-foreground">{item.quantity} {item.unit}</p>
+                      </TableCell>
+                      <TableCell className="text-foreground">{item.threshold} {item.unit}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={status.variant}
+                          className={status.className}
+                        >
+                          {status.label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={item.auto_request_enabled ? 'default' : 'secondary'}>
+                          {item.auto_request_enabled ? 'Enabled' : 'Disabled'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            className="bg-primary hover:bg-primary/90"
+                            onClick={() => setRedistributeDialog({ open: true, item })}
+                          >
+                            <RefreshCw className="w-3.5 h-3.5 mr-1" />
+                            Redistribute
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => setSettingsDialog({ open: true, item })}
+                          >
+                            <Settings className="w-3.5 h-3.5 mr-1" />
+                            Settings
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Dialogs */}
+      {redistributeDialog.item && (
+        <RedistributeDialog
+          open={redistributeDialog.open}
+          onOpenChange={(open) => setRedistributeDialog({ open, item: null })}
+          product={{
+            id: redistributeDialog.item.product_id,
+            name: redistributeDialog.item.product_name,
+            unit: redistributeDialog.item.unit,
+          }}
+          currentStock={redistributeDialog.item.quantity}
+          threshold={redistributeDialog.item.threshold}
+        />
+      )}
+
+      {settingsDialog.item && (
+        <ItemSettingsDialog
+          open={settingsDialog.open}
+          onOpenChange={(open) => setSettingsDialog({ open, item: null })}
+          product={{
+            id: settingsDialog.item.product_id,
+            name: settingsDialog.item.product_name,
+            unit: settingsDialog.item.unit,
+          }}
+          currentStock={settingsDialog.item.quantity}
+          currentThreshold={settingsDialog.item.threshold}
+          autoRequestEnabled={settingsDialog.item.auto_request_enabled}
+        />
+      )}
     </div>
   );
 }

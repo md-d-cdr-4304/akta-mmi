@@ -16,28 +16,34 @@ export type Database = {
     Tables: {
       kiosk_inventory: {
         Row: {
+          auto_request_enabled: boolean | null
           created_at: string | null
           id: string
           kiosk_id: string | null
           last_updated: string | null
           product_id: string | null
           quantity: number
+          threshold: number | null
         }
         Insert: {
+          auto_request_enabled?: boolean | null
           created_at?: string | null
           id?: string
           kiosk_id?: string | null
           last_updated?: string | null
           product_id?: string | null
           quantity?: number
+          threshold?: number | null
         }
         Update: {
+          auto_request_enabled?: boolean | null
           created_at?: string | null
           id?: string
           kiosk_id?: string | null
           last_updated?: string | null
           product_id?: string | null
           quantity?: number
+          threshold?: number | null
         }
         Relationships: [
           {

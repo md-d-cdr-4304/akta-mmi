@@ -20,6 +20,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RedistributeDialog } from "@/components/RedistributeDialog";
+import { ItemSettingsDialog } from "@/components/ItemSettingsDialog";
 
 interface Product {
   id: string;
@@ -56,6 +58,10 @@ export default function Inventory() {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [redistributeDialog, setRedistributeDialog] = useState<{
+    open: boolean;
+    product: Product | null;
+  }>({ open: false, product: null });
 
   const { data: products, isLoading } = useQuery({
     queryKey: ["products"],
@@ -561,6 +567,7 @@ export default function Inventory() {
                                 size="lg"
                                 disabled={!product.eligible_for_redistribution || financialStatus.redistributableQty === 0}
                                 variant={product.eligible_for_redistribution && financialStatus.redistributableQty > 0 ? "default" : "secondary"}
+                                onClick={() => setRedistributeDialog({ open: true, product })}
                               >
                                 <TrendingUp className="w-4 h-4 mr-2" />
                                 {!product.eligible_for_redistribution ? "Not Eligible for Redistribution" : 
@@ -645,6 +652,7 @@ export default function Inventory() {
                             size="sm"
                             variant={isOverstock ? "default" : "outline"}
                             disabled={!isOverstock}
+                            onClick={() => isOverstock && setRedistributeDialog({ open: true, product })}
                           >
                             {isOverstock ? "Redistribute" : "No Action"}
                           </Button>
@@ -658,6 +666,21 @@ export default function Inventory() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Redistribution Dialog */}
+      {redistributeDialog.product && (
+        <RedistributeDialog
+          open={redistributeDialog.open}
+          onOpenChange={(open) => setRedistributeDialog({ open, product: null })}
+          product={{
+            id: redistributeDialog.product.id,
+            name: redistributeDialog.product.name,
+            unit: redistributeDialog.product.unit,
+          }}
+          currentStock={redistributeDialog.product.quantity}
+          threshold={redistributeDialog.product.under_supply_limit}
+        />
+      )}
     </div>
   );
 }
