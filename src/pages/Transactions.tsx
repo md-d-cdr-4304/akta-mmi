@@ -4,55 +4,80 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Receipt, Search, Copy, ExternalLink } from "lucide-react";
-
-const transactions = [
-  {
-    txId: "a9f3e17b-4b39-4780-a881-cfdce1231df6",
-    from: "KIOSK002",
-    to: "KIOSK001",
-    item: "Almond Milk",
-    quantity: "20 liters",
-    status: "pending",
-    timestamp: "9/15/2025, 5:16:25 PM",
-    value: "-",
-    blockchainRef: "0xDummyHash",
-  },
-  {
-    txId: "718cb165-3f53-48ff-bfd7-a0e6fbd65e77",
-    from: "KIOSK002",
-    to: "KIOSK001",
-    item: "Almond Milk",
-    quantity: "8 liters",
-    status: "completed",
-    timestamp: "9/15/2025, 3:15:48 PM",
-    value: "-",
-    blockchainRef: "0xDummyHash",
-  },
-  {
-    txId: "c5f8da69-34ce-4aa1-8d02-6f28b5028730",
-    from: "KIOSK002",
-    to: "KIOSK001",
-    item: "Free-Range Eggs",
-    quantity: "30 dozen",
-    status: "pending",
-    timestamp: "9/6/2025, 3:42:10 PM",
-    value: "-",
-    blockchainRef: "0xDummyHash",
-  },
-  {
-    txId: "545f6fbf-1ca0-4170-8b8d-e64ea39eea23",
-    from: "KIOSK001",
-    to: "KIOSK002",
-    item: "Almond Milk",
-    quantity: "10 liters",
-    status: "pending",
-    timestamp: "9/3/2025, 9:13:55 PM",
-    value: "-",
-    blockchainRef: "0xDummyHash",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Transactions() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const { data: transactions, isLoading } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("transactions")
+        .select(`
+          *,
+          product:products(name),
+          from_kiosk:kiosks!transactions_from_kiosk_id_fkey(name, kiosk_code),
+          to_kiosk:kiosks!transactions_to_kiosk_id_fkey(name, kiosk_code),
+          redistribution:redistributions(priority, reason)
+        `)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast.error("Failed to load transactions");
+        throw error;
+      }
+
+      return data;
+    },
+  });
+
+  const filteredTransactions = transactions?.filter((tx) => {
+    const matchesSearch = 
+      tx.tx_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tx.product?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tx.from_kiosk?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tx.to_kiosk?.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = statusFilter === "all" || tx.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard");
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "bg-success text-success-foreground";
+      case "pending":
+        return "bg-warning text-warning-foreground";
+      case "failed":
+        return "bg-destructive text-destructive-foreground";
+      default:
+        return "bg-muted text-muted-foreground";
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "High Priority":
+        return "bg-destructive text-destructive-foreground";
+      case "Medium Priority":
+        return "bg-warning text-warning-foreground";
+      case "Low Priority":
+        return "bg-success text-success-foreground";
+      default:
+        return "bg-muted text-muted-foreground";
+    }
+  };
   return (
     <div className="space-y-6">
       <div>
@@ -72,9 +97,11 @@ export default function Transactions() {
               <Input
                 placeholder="Search transactions..."
                 className="pl-9"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Select defaultValue="all">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
@@ -95,6 +122,7 @@ export default function Transactions() {
                   <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">TX ID</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">From → To</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Item & Quantity</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Priority</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Status</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Timestamp</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-muted-foreground">Value</th>
@@ -102,55 +130,86 @@ export default function Transactions() {
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((tx) => (
-                  <tr key={tx.txId} className="border-b border-border hover:bg-muted/50">
-                    <td className="py-4 px-4">
-                      <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
-                        {tx.txId.substring(0, 30)}...
-                      </code>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="text-sm">
-                        <div className="font-medium">{tx.from}</div>
-                        <div className="text-muted-foreground">↓</div>
-                        <div className="font-medium">{tx.to}</div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="text-sm">
-                        <div className="font-medium">{tx.item}</div>
-                        <div className="text-muted-foreground">{tx.quantity}</div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <Badge
-                        variant={tx.status === "completed" ? "default" : "secondary"}
-                        className={
-                          tx.status === "completed"
-                            ? "bg-success"
-                            : "bg-warning text-warning-foreground"
-                        }
-                      >
-                        {tx.status}
-                      </Badge>
-                    </td>
-                    <td className="py-4 px-4 text-sm">{tx.timestamp}</td>
-                    <td className="py-4 px-4 text-sm">{tx.value}</td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
-                          {tx.blockchainRef}
-                        </code>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Copy className="w-3 h-3" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <ExternalLink className="w-3 h-3" />
-                        </Button>
-                      </div>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={8} className="py-8 text-center text-muted-foreground">
+                      Loading transactions...
                     </td>
                   </tr>
-                ))}
+                ) : !filteredTransactions || filteredTransactions.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-8 text-center text-muted-foreground">
+                      No transactions found
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTransactions.map((tx) => (
+                    <tr key={tx.id} className="border-b border-border hover:bg-muted/50">
+                      <td className="py-4 px-4">
+                        <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
+                          {tx.tx_id.substring(0, 30)}...
+                        </code>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="text-sm">
+                          <div className="font-medium">
+                            {tx.from_kiosk?.kiosk_code || "Unknown"}
+                          </div>
+                          <div className="text-muted-foreground">↓</div>
+                          <div className="font-medium">
+                            {tx.to_kiosk?.kiosk_code || "Unknown"}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="text-sm">
+                          <div className="font-medium">{tx.product?.name || "Unknown"}</div>
+                          <div className="text-muted-foreground">
+                            {tx.quantity} {tx.unit}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        {tx.redistribution?.priority ? (
+                          <Badge className={getPriorityColor(tx.redistribution.priority)}>
+                            {tx.redistribution.priority}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
+                      </td>
+                      <td className="py-4 px-4">
+                        <Badge className={getStatusColor(tx.status)}>
+                          {tx.status}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4 text-sm">
+                        {new Date(tx.created_at).toLocaleString()}
+                      </td>
+                      <td className="py-4 px-4 text-sm">
+                        {tx.value ? `$${tx.value}` : "-"}
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
+                            {tx.blockchain_ref}
+                          </code>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => copyToClipboard(tx.blockchain_ref)}
+                          >
+                            <Copy className="w-3 h-3" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <ExternalLink className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
