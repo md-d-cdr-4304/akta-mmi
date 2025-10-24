@@ -39,6 +39,8 @@ export default function Alerts() {
     onSuccess: () => {
       toast.success("Request approved successfully");
       queryClient.invalidateQueries({ queryKey: ["admin-redistributions"] });
+      queryClient.invalidateQueries({ queryKey: ["redistribution-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["kiosk-requests-notifications"] });
       queryClient.invalidateQueries({ queryKey: ["kiosk-redistributions"] });
     },
     onError: () => {
@@ -58,6 +60,8 @@ export default function Alerts() {
     onSuccess: () => {
       toast.success("Request rejected");
       queryClient.invalidateQueries({ queryKey: ["admin-redistributions"] });
+      queryClient.invalidateQueries({ queryKey: ["redistribution-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["kiosk-requests-notifications"] });
       queryClient.invalidateQueries({ queryKey: ["kiosk-redistributions"] });
     },
     onError: () => {
