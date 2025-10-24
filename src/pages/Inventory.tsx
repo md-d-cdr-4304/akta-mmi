@@ -118,12 +118,14 @@ export default function Inventory() {
   };
 
   const getSupplyStatus = (product: Product) => {
-    if (!product.supply_level) return { text: "Normal Supply", color: "bg-success", variant: "default" as const };
+    const quantity = product.quantity || 0;
+    const overSupplyLimit = product.over_supply_limit;
+    const underSupplyLimit = product.under_supply_limit;
     
-    if (product.supply_level > 100) {
+    if (quantity > overSupplyLimit) {
       return { text: "Oversupply", color: "bg-destructive", variant: "destructive" as const };
-    } else if (product.supply_level < 67) {
-      return { text: "Undersupply", color: "bg-warning", variant: "secondary" as const };
+    } else if (quantity < underSupplyLimit) {
+      return { text: "Low Supply", color: "bg-warning", variant: "secondary" as const };
     }
     return { text: "Normal Supply", color: "bg-success", variant: "default" as const };
   };
@@ -198,11 +200,12 @@ export default function Inventory() {
 
   const filteredProducts = products?.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const quantity = product.quantity || 0;
     const matchesFilter = 
       filterStatus === "all" || 
       (filterStatus === "eligible" && product.eligible_for_redistribution) ||
-      (filterStatus === "oversupply" && (product.supply_level || 0) > 100) ||
-      (filterStatus === "undersupply" && (product.supply_level || 0) < 67);
+      (filterStatus === "oversupply" && quantity > product.over_supply_limit) ||
+      (filterStatus === "undersupply" && quantity < product.under_supply_limit);
     return matchesSearch && matchesFilter;
   });
 
@@ -241,7 +244,7 @@ export default function Inventory() {
                 <SelectItem value="all">All Items</SelectItem>
                 <SelectItem value="eligible">Eligible</SelectItem>
                 <SelectItem value="oversupply">Oversupply</SelectItem>
-                <SelectItem value="undersupply">Undersupply</SelectItem>
+                <SelectItem value="undersupply">Low Supply</SelectItem>
               </SelectContent>
             </Select>
           </div>
