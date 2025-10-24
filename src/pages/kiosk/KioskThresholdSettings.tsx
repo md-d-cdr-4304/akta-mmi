@@ -117,57 +117,49 @@ export default function KioskThresholdSettings() {
         <p className="text-muted-foreground">Configure auto-request thresholds for each item</p>
       </div>
 
-      <Card>
-        <CardContent className="p-6">
-          {isLoading ? (
-            <div className="text-center text-muted-foreground py-8">Loading inventory items...</div>
-          ) : inventoryItems?.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">No inventory items found</div>
-          ) : (
-            <div className="space-y-3">
-              {inventoryItems?.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between p-4 border border-border/40 rounded-xl hover:shadow-md transition-all"
+      <div className="space-y-3">
+        {isLoading ? (
+          <div className="text-center text-muted-foreground py-8">Loading inventory items...</div>
+        ) : inventoryItems?.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">No inventory items found</div>
+        ) : (
+          inventoryItems?.map((item) => (
+            <div
+              key={item.id}
+              className="flex items-center justify-between p-5 bg-card border border-border/40 rounded-lg hover:border-border transition-all"
+            >
+              <div>
+                <h3 className="font-semibold text-foreground text-base mb-1">{item.product_name}</h3>
+                <p className="text-sm text-primary/80">
+                  Current: {item.quantity} {item.unit}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-6">
+                <span className="text-sm text-foreground">
+                  Threshold: <span className="font-semibold">{item.threshold} {item.unit}</span>
+                </span>
+
+                <span className="text-sm text-foreground min-w-[140px]">
+                  Auto-Request: <span className={item.auto_request_enabled ? "font-semibold text-success" : "font-semibold text-muted-foreground"}>
+                    {item.auto_request_enabled ? "On" : "Off"}
+                  </span>
+                </span>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEdit(item)}
+                  className="gap-2 hover:bg-accent"
                 >
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground mb-1">{item.product_name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Current: {item.quantity} {item.unit}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-6">
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground mb-1">Threshold</p>
-                      <p className="font-semibold text-foreground">
-                        {item.threshold} {item.unit}
-                      </p>
-                    </div>
-
-                    <div className="text-right min-w-[120px]">
-                      <p className="text-sm text-muted-foreground mb-1">Auto-Request</p>
-                      <Badge variant={item.auto_request_enabled ? "default" : "secondary"}>
-                        {item.auto_request_enabled ? "On" : "Off"}
-                      </Badge>
-                    </div>
-
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(item)}
-                      className="gap-2"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Edit
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                  <Edit className="w-4 h-4" />
+                  Edit
+                </Button>
+              </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          ))
+        )}
+      </div>
 
       <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
         <DialogContent>
