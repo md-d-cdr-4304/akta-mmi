@@ -14,11 +14,11 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full">
         <AppSidebar />
         
         <div className="flex-1 flex flex-col">
-          <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6 sticky top-0 z-10 backdrop-blur-sm bg-card/95">
+          <header className="h-16 border-b border-border/50 bg-card/80 flex items-center justify-between px-6 sticky top-0 z-10 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-4 flex-1">
               <SidebarTrigger className="text-foreground" />
               <img src={logo} alt="ÄKTA Logo" className="h-8 w-8 object-contain" />
@@ -47,7 +47,7 @@ export function Layout({ children }: LayoutProps) {
             </div>
           </header>
           
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-6 animate-fade-in">
             {children}
           </main>
         </div>
