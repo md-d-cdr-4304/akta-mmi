@@ -95,6 +95,12 @@ export default function KioskLogin() {
               Sign in here
             </a>
           </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Need demo users?{' '}
+            <a href="/demo-setup" className="text-success hover:underline font-medium">
+              Set up demo accounts
+            </a>
+          </p>
         </div>
 
         <div className="mt-6 p-4 bg-muted/30 rounded-xl">

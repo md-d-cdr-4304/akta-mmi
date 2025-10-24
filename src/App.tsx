@@ -22,6 +22,7 @@ import KioskInventory from "./pages/kiosk/KioskInventory";
 import KioskRequests from "./pages/kiosk/KioskRequests";
 import KioskTransactions from "./pages/kiosk/KioskTransactions";
 import KioskSettings from "./pages/kiosk/KioskSettings";
+import DemoSetup from "./pages/DemoSetup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
           <AuthProvider>
             <Routes>
               {/* Public Routes */}
+              <Route path="/demo-setup" element={<DemoSetup />} />
               <Route path="/admin-login" element={<AdminLogin />} />
               <Route path="/kiosk-login" element={<KioskLogin />} />
               
