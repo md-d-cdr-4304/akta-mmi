@@ -97,7 +97,7 @@ export function KioskLayout({ children }: KioskLayoutProps) {
           <div className="flex items-center gap-3 ml-6">
             <button className="relative p-2.5 hover:bg-accent/40 rounded-xl transition-all duration-300 hover:scale-110 group">
               <Bell className="w-5 h-5 text-foreground/80 group-hover:text-primary transition-colors" />
-              <Badge className="absolute -top-0.5 -right-0.5 w-5 h-5 flex items-center justify-center p-0 bg-destructive text-destructive-foreground text-xs shadow-md animate-pulse">
+              <Badge className="absolute -top-0.5 -right-0.5 w-5 h-5 flex items-center justify-center p-0 bg-destructive text-destructive-foreground text-xs shadow-md">
                 2
               </Badge>
             </button>
