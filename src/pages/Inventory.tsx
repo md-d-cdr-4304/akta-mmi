@@ -308,14 +308,19 @@ export default function Inventory() {
                               {new Date(product.updated_at).toLocaleDateString()} {new Date(product.updated_at).toLocaleTimeString()}
                             </TableCell>
                             <TableCell>
-                              <Button 
-                                size="sm"
-                                variant={product.eligible_for_redistribution ? "default" : "secondary"}
-                                className="gap-2"
-                                disabled={!product.eligible_for_redistribution}
-                              >
-                                {product.eligible_for_redistribution ? "Redistribute" : "No Action"}
-                              </Button>
+                              {(() => {
+                                const isEligible = product.quantity > product.over_supply_limit;
+                                return (
+                                  <Button 
+                                    size="sm"
+                                    variant={isEligible ? "default" : "secondary"}
+                                    className="gap-2"
+                                    disabled={!isEligible}
+                                  >
+                                    {isEligible ? "Redistribute" : "No Action"}
+                                  </Button>
+                                );
+                              })()}
                             </TableCell>
                           </TableRow>
                         );
@@ -392,7 +397,7 @@ export default function Inventory() {
                               >
                                 <Button
                                   size="sm"
-                                  variant={product.eligible_for_redistribution ? "default" : "destructive"}
+                                  variant={isOverThreshold ? "default" : "secondary"}
                                   className="gap-2"
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -400,9 +405,9 @@ export default function Inventory() {
                                   }}
                                 >
                                   <div className={`w-2 h-2 rounded-full ${
-                                    product.eligible_for_redistribution ? "bg-success" : "bg-destructive"
+                                    isOverThreshold ? "bg-success" : "bg-muted"
                                   }`} />
-                                  {product.eligible_for_redistribution ? "Eligible" : "Not Eligible"}
+                                  {isOverThreshold ? "Eligible" : "Not Eligible"}
                                 </Button>
                               </div>
 
