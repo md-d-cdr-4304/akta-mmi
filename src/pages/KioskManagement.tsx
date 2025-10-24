@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Store, MapPin, User, Mail, Eye, Pencil, Plus, X } from "lucide-react";
+import { Store, MapPin, User, Mail, Eye, Pencil, Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -215,23 +216,12 @@ export default function KioskManagement() {
       <Dialog open={viewDetailsOpen} onOpenChange={setViewDetailsOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <DialogTitle className="text-xl">
-                  Kiosk Inventory - {selectedKiosk?.name}
-                </DialogTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Current inventory levels and item details
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setViewDetailsOpen(false)}
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+            <DialogTitle className="text-xl">
+              Kiosk Inventory - {selectedKiosk?.name}
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Current inventory levels and item details
+            </p>
           </DialogHeader>
           
           <Table>
@@ -331,6 +321,22 @@ export default function KioskManagement() {
                 defaultValue={selectedKiosk?.email || ""}
                 className="mt-1"
               />
+            </div>
+            
+            <div>
+              <Label htmlFor="activity-status">Activity Status</Label>
+              <Select defaultValue={selectedKiosk?.status || "Active"}>
+                <SelectTrigger id="activity-status" className="mt-1">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Active kiosks will automatically update when they log in. Set to Inactive for manual control.
+              </p>
             </div>
           </div>
 
