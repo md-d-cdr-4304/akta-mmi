@@ -15,6 +15,32 @@ export default function DemoSetup() {
   const [isCreating, setIsCreating] = useState(false);
   const navigate = useNavigate();
 
+  const resetDemoPasswords = async () => {
+    setIsCreating(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-demo-passwords`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to reset passwords');
+      }
+
+      toast.success('Demo passwords reset successfully! You can now log in.');
+      navigate('/admin-login');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to reset demo passwords');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   const createDemoUsers = async () => {
     setIsCreating(true);
     try {
@@ -41,7 +67,15 @@ export default function DemoSetup() {
         }
       });
 
-      if (adminError) throw adminError;
+      if (adminError) {
+        // If user already exists, suggest password reset
+        if (adminError.message.includes('already registered')) {
+          toast.error('Demo users already exist. Use "Reset Demo Passwords" instead.');
+          setIsCreating(false);
+          return;
+        }
+        throw adminError;
+      }
 
       // Assign admin role
       if (adminData.user) {
@@ -80,7 +114,9 @@ export default function DemoSetup() {
           }
         });
 
-        if (kioskError) throw kioskError;
+        if (kioskError && !kioskError.message.includes('already registered')) {
+          throw kioskError;
+        }
 
         // Assign kiosk role
         if (kioskData.user) {
@@ -94,7 +130,6 @@ export default function DemoSetup() {
       toast.success('Demo users created successfully!');
       navigate('/admin-login');
     } catch (error: any) {
-      console.error('Error creating demo users:', error);
       toast.error(error.message || 'Failed to create demo users');
     } finally {
       setIsCreating(false);
@@ -109,13 +144,25 @@ export default function DemoSetup() {
           Create demo users for testing the application
         </p>
         
-        <Button 
-          onClick={createDemoUsers} 
-          disabled={isCreating}
-          className="w-full"
-        >
-          {isCreating ? 'Creating Users...' : 'Create Demo Users'}
-        </Button>
+        <div className="space-y-3">
+          <Button 
+            onClick={resetDemoPasswords} 
+            disabled={isCreating}
+            className="w-full"
+            variant="default"
+          >
+            {isCreating ? 'Resetting...' : 'Reset Demo Passwords'}
+          </Button>
+          
+          <Button 
+            onClick={createDemoUsers} 
+            disabled={isCreating}
+            className="w-full"
+            variant="outline"
+          >
+            {isCreating ? 'Creating Users...' : 'Create New Demo Users'}
+          </Button>
+        </div>
 
         <div className="mt-6 p-4 bg-muted/30 rounded-xl text-left">
           <p className="text-xs text-muted-foreground font-medium mb-2">Demo credentials that will be created:</p>
