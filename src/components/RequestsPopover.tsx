@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -9,12 +10,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, Send, TrendingDown, ExternalLink, CheckCircle2, XCircle, Package, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import ApproveRequestDialog from "@/components/ApproveRequestDialog";
 
 export function RequestsPopover() {
   const { kioskId, userRole } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isAdmin = userRole === "admin";
+  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
 
   // Kiosk-specific requests
   const { data: kioskRequests } = useQuery({
@@ -66,26 +70,6 @@ export function RequestsPopover() {
   const pendingRequests = requests?.filter(r => r.status === "pending") || [];
   const otherRequests = requests?.filter(r => r.status !== "pending") || [];
 
-  const approveRequestMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("redistributions")
-        .update({ status: "approved", completed_at: new Date().toISOString() })
-        .eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast({ title: "Success", description: "Request approved successfully" });
-      queryClient.invalidateQueries({ queryKey: ["kiosk-requests-notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-requests-notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["kiosk-redistributions"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-redistributions"] });
-      queryClient.invalidateQueries({ queryKey: ["redistribution-stats"] });
-    },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to approve request", variant: "destructive" });
-    },
-  });
 
   const rejectRequestMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -188,16 +172,16 @@ export function RequestsPopover() {
           </p>
         )}
 
-        {isPending && (
+        {isPending && isAdmin && (
           <div className="flex gap-2 mt-3 pl-11">
             <Button
               size="sm"
               className="h-7 text-xs bg-success hover:bg-success/90 flex-1"
               onClick={(e) => {
                 e.stopPropagation();
-                approveRequestMutation.mutate(request.id);
+                setSelectedRequest(request);
+                setApproveDialogOpen(true);
               }}
-              disabled={approveRequestMutation.isPending}
             >
               <CheckCircle2 className="w-3 h-3 mr-1" />
               Approve
@@ -222,8 +206,9 @@ export function RequestsPopover() {
   };
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+  <>
+  <Popover>
+    <PopoverTrigger asChild>
         <button className="relative p-2.5 hover:bg-accent/40 rounded-xl transition-all duration-300 hover:scale-110 group">
           <Bell className="w-5 h-5 text-foreground/80 group-hover:text-primary transition-colors" />
           {pendingRequests.length > 0 && (
@@ -301,9 +286,16 @@ export function RequestsPopover() {
                 </div>
               )}
             </ScrollArea>
-          </TabsContent>
-        </Tabs>
-      </PopoverContent>
-    </Popover>
+        </TabsContent>
+      </Tabs>
+    </PopoverContent>
+  </Popover>
+
+  <ApproveRequestDialog
+    open={approveDialogOpen}
+    onOpenChange={setApproveDialogOpen}
+    request={selectedRequest}
+  />
+  </>
   );
 }

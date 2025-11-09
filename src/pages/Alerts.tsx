@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -5,9 +6,12 @@ import { Bell, Package, CheckCircle2, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import ApproveRequestDialog from "@/components/ApproveRequestDialog";
 
 export default function Alerts() {
   const queryClient = useQueryClient();
+  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
 
   const { data: redistributions, isLoading } = useQuery({
     queryKey: ["admin-redistributions"],
@@ -20,6 +24,7 @@ export default function Alerts() {
           from_kiosk:from_kiosk_id (name, kiosk_code),
           to_kiosk:to_kiosk_id (name, kiosk_code)
         `)
+        .eq("status", "pending")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -27,26 +32,6 @@ export default function Alerts() {
     },
   });
 
-  const approveRequestMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("redistributions")
-        .update({ status: "approved", completed_at: new Date().toISOString() })
-        .eq("id", id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Request approved successfully");
-      queryClient.invalidateQueries({ queryKey: ["admin-redistributions"] });
-      queryClient.invalidateQueries({ queryKey: ["redistribution-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["kiosk-requests-notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["kiosk-redistributions"] });
-    },
-    onError: () => {
-      toast.error("Failed to approve request");
-    },
-  });
 
   const rejectRequestMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -162,8 +147,10 @@ export default function Alerts() {
                           <Button 
                             size="sm" 
                             className="bg-success hover:bg-success/90"
-                            onClick={() => approveRequestMutation.mutate(request.id)}
-                            disabled={approveRequestMutation.isPending}
+                            onClick={() => {
+                              setSelectedRequest(request);
+                              setApproveDialogOpen(true);
+                            }}
                           >
                             <CheckCircle2 className="w-4 h-4 mr-1" />
                             Approve
@@ -187,6 +174,12 @@ export default function Alerts() {
           )}
         </CardContent>
       </Card>
+
+      <ApproveRequestDialog
+        open={approveDialogOpen}
+        onOpenChange={setApproveDialogOpen}
+        request={selectedRequest}
+      />
     </div>
   );
 }

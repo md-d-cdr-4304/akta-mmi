@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -5,9 +6,12 @@ import { Clock, AlertTriangle, CheckCircle2, Package, TrendingUp, X } from "luci
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
+import ApproveRequestDialog from "@/components/ApproveRequestDialog";
 
 export default function Redistribution() {
   const queryClient = useQueryClient();
+  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
 
   const { data: redistributions, isLoading } = useQuery({
     queryKey: ["admin-redistributions"],
@@ -50,25 +54,6 @@ export default function Redistribution() {
     },
   });
 
-  const approveRequestMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("redistributions")
-        .update({ status: "approved", completed_at: new Date().toISOString() })
-        .eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast({ title: "Success", description: "Request approved successfully" });
-      queryClient.invalidateQueries({ queryKey: ["admin-redistributions"] });
-      queryClient.invalidateQueries({ queryKey: ["redistribution-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["kiosk-requests-notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["kiosk-redistributions"] });
-    },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to approve request", variant: "destructive" });
-    },
-  });
 
   const rejectRequestMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -214,8 +199,10 @@ export default function Redistribution() {
                         <div className="flex flex-col gap-2 ml-4">
                           <Button 
                             className="bg-success hover:bg-success/90 whitespace-nowrap"
-                            onClick={() => approveRequestMutation.mutate(request.id)}
-                            disabled={approveRequestMutation.isPending}
+                            onClick={() => {
+                              setSelectedRequest(request);
+                              setApproveDialogOpen(true);
+                            }}
                           >
                             <CheckCircle2 className="w-4 h-4 mr-2" />
                             Review & Approve
@@ -239,6 +226,12 @@ export default function Redistribution() {
           )}
         </CardContent>
       </Card>
+
+      <ApproveRequestDialog
+        open={approveDialogOpen}
+        onOpenChange={setApproveDialogOpen}
+        request={selectedRequest}
+      />
     </div>
   );
 }
