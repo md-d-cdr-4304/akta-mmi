@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RequestsPopover } from "@/components/RequestsPopover";
 import { User, LogOut, LayoutDashboard, Package, TrendingUp, Receipt, Settings, Sliders } from "lucide-react";
-import logo from "@/assets/lumenar-logo.jpg";
+import logo from "@/assets/lumenar-logo.png";
 
 interface KioskLayoutProps {
   children: ReactNode;

@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import logo from "@/assets/lumenar-logo.jpg";
+import logo from "@/assets/lumenar-logo.png";
 
 interface LayoutProps {
   children: ReactNode;

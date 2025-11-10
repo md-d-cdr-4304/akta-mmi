@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Store, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import lumenarLogo from "@/assets/lumenar-logo.jpg";
+import lumenarLogo from "@/assets/lumenar-logo.png";
 import { z } from "zod";
 
 const loginSchema = z.object({
