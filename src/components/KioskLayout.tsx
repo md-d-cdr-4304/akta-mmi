@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RequestsPopover } from "@/components/RequestsPopover";
 import { User, LogOut, LayoutDashboard, Package, TrendingUp, Receipt, Settings, Sliders } from "lucide-react";
-import logo from "@/assets/akta-logo.jpeg";
+import logo from "@/assets/lumenar-logo.jpg";
 
 interface KioskLayoutProps {
   children: ReactNode;
@@ -40,9 +40,9 @@ export function KioskLayout({ children }: KioskLayoutProps) {
       <aside className="w-64 gradient-dark text-white flex flex-col shadow-xl">
         <div className="p-6 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <img src={logo} alt="ÄKTA" className="w-11 h-11 rounded-xl object-contain bg-white/10 p-2 hover-lift" />
+            <img src={logo} alt="LUMENAR" className="w-11 h-11 rounded-xl object-contain bg-white/10 p-2 hover-lift" />
             <div>
-              <h1 className="font-bold text-lg">ÄKTA</h1>
+              <h1 className="font-bold text-lg">LUMENAR</h1>
               <p className="text-xs text-white/70">Downtown Fresh Market</p>
             </div>
           </div>

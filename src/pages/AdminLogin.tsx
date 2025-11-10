@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Package, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import aktaLogo from "@/assets/akta-logo.jpeg";
+import lumenarLogo from "@/assets/lumenar-logo.jpg";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -63,7 +63,7 @@ export default function AdminLogin() {
         {/* Logo section */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-24 h-24 mb-6 overflow-hidden rounded-2xl shadow-lg bg-white">
-            <img src={aktaLogo} alt="AKTA Logo" className="w-full h-full object-cover" />
+            <img src={lumenarLogo} alt="LUMENAR Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-3xl font-light text-foreground mb-2 tracking-tight">Admin Portal</h1>
           <p className="text-muted-foreground text-sm">Manage your inventory system</p>
@@ -79,7 +79,7 @@ export default function AdminLogin() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@akta.com"
+                placeholder="admin@lumenar.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -135,7 +135,7 @@ export default function AdminLogin() {
         {/* Demo credentials */}
         <div className="mt-6 p-4 bg-accent/30 backdrop-blur-sm rounded-xl border border-border/30 text-center">
           <p className="text-xs text-muted-foreground font-medium mb-1">Demo Credentials</p>
-          <p className="text-xs text-foreground/80">admin@akta.com / admin123456</p>
+          <p className="text-xs text-foreground/80">admin@lumenar.com / admin123456</p>
         </div>
       </div>
     </div>

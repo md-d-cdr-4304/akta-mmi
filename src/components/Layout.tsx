@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import logo from "@/assets/akta-logo.jpeg";
+import logo from "@/assets/lumenar-logo.jpg";
 
 interface LayoutProps {
   children: ReactNode;
@@ -37,7 +37,7 @@ export function Layout({ children }: LayoutProps) {
           <header className="h-20 border-b border-border/30 bg-card/80 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
             <div className="flex items-center gap-6 flex-1">
               <SidebarTrigger className="text-foreground hover:text-primary transition-all hover:scale-110" />
-              <img src={logo} alt="ÄKTA Logo" className="h-10 w-10 object-contain rounded-xl hover-lift" />
+              <img src={logo} alt="LUMENAR Logo" className="h-10 w-10 object-contain rounded-xl hover-lift" />
               <div className="max-w-xl flex-1">
                 <Input
                   type="search"

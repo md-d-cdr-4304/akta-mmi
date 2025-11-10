@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Store, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import aktaLogo from "@/assets/akta-logo.jpeg";
+import lumenarLogo from "@/assets/lumenar-logo.jpg";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -63,7 +63,7 @@ export default function KioskLogin() {
         {/* Logo section */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-24 h-24 mb-6 overflow-hidden rounded-2xl shadow-lg bg-white">
-            <img src={aktaLogo} alt="AKTA Logo" className="w-full h-full object-cover" />
+            <img src={lumenarLogo} alt="LUMENAR Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-3xl font-light text-foreground mb-2 tracking-tight">Kiosk Portal</h1>
           <p className="text-muted-foreground text-sm">Manage your kiosk inventory</p>
@@ -79,7 +79,7 @@ export default function KioskLogin() {
               <Input
                 id="email"
                 type="email"
-                placeholder="kiosk001@akta.com"
+                placeholder="kiosk001@lumenar.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -135,7 +135,7 @@ export default function KioskLogin() {
         {/* Demo credentials */}
         <div className="mt-6 p-4 bg-accent/30 backdrop-blur-sm rounded-xl border border-border/30 text-center">
           <p className="text-xs text-muted-foreground font-medium mb-1">Demo Credentials</p>
-          <p className="text-xs text-foreground/80">kiosk001@akta.com / kiosk123456</p>
+          <p className="text-xs text-foreground/80">kiosk001@lumenar.com / kiosk123456</p>
           <p className="text-xs text-foreground/70 mt-1">Also: kiosk002, kiosk003</p>
         </div>
       </div>

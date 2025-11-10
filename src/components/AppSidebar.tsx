@@ -46,7 +46,7 @@ export function AppSidebar() {
           <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-lg hover-lift">
             <Package2 className="w-7 h-7 text-white" />
           </div>
-          <span className="text-2xl font-bold text-white tracking-tight">ÄKTA</span>
+          <span className="text-2xl font-bold text-white tracking-tight">LUMENAR</span>
         </div>
       </SidebarHeader>
 
