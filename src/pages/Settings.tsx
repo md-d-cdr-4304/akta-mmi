@@ -77,7 +77,7 @@ export default function Settings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="email">Contact Email</Label>
-                  <Input id="email" type="email" defaultValue="manager@lumenar.com" />
+                  <Input id="email" type="email" defaultValue="manager@akta.com" />
                 </div>
 
                 <div className="space-y-2">

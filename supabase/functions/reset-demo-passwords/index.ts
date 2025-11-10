@@ -24,10 +24,10 @@ Deno.serve(async (req) => {
 
     // Define demo users and their passwords
     const demoUsers = [
-      { email: 'admin@lumenar.com', password: 'admin123456' },
-      { email: 'kiosk001@lumenar.com', password: 'kiosk123456' },
-      { email: 'kiosk002@lumenar.com', password: 'kiosk123456' },
-      { email: 'kiosk003@lumenar.com', password: 'kiosk123456' },
+      { email: 'admin@akta.com', password: 'admin123456' },
+      { email: 'kiosk001@akta.com', password: 'kiosk123456' },
+      { email: 'kiosk002@akta.com', password: 'kiosk123456' },
+      { email: 'kiosk003@akta.com', password: 'kiosk123456' },
     ]
 
     const results = []

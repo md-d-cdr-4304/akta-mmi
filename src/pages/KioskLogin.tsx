@@ -79,7 +79,7 @@ export default function KioskLogin() {
               <Input
                 id="email"
                 type="email"
-                placeholder="kiosk001@lumenar.com"
+                placeholder="kiosk001@akta.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -135,7 +135,7 @@ export default function KioskLogin() {
         {/* Demo credentials */}
         <div className="mt-6 p-4 bg-accent/30 backdrop-blur-sm rounded-xl border border-border/30 text-center">
           <p className="text-xs text-muted-foreground font-medium mb-1">Demo Credentials</p>
-          <p className="text-xs text-foreground/80">kiosk001@lumenar.com / kiosk123456</p>
+          <p className="text-xs text-foreground/80">kiosk001@akta.com / kiosk123456</p>
           <p className="text-xs text-foreground/70 mt-1">Also: kiosk002, kiosk003</p>
         </div>
       </div>

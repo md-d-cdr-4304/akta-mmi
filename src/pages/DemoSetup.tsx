@@ -46,7 +46,7 @@ export default function DemoSetup() {
     try {
       // Validate admin credentials
       const adminValidation = signupSchema.safeParse({
-        email: 'admin@lumenar.com',
+        email: 'admin@akta.com',
         password: 'admin123456',
         full_name: 'Admin User'
       });
@@ -87,9 +87,9 @@ export default function DemoSetup() {
 
       // Create kiosk users
       const kioskUsers = [
-        { email: 'kiosk001@lumenar.com', name: 'Downtown Fresh Market' },
-        { email: 'kiosk002@lumenar.com', name: 'Mall Central Kiosk' },
-        { email: 'kiosk003@lumenar.com', name: 'Airport Terminal Kiosk' }
+        { email: 'kiosk001@akta.com', name: 'Downtown Fresh Market' },
+        { email: 'kiosk002@akta.com', name: 'Mall Central Kiosk' },
+        { email: 'kiosk003@akta.com', name: 'Airport Terminal Kiosk' }
       ];
 
       for (const kiosk of kioskUsers) {
@@ -166,8 +166,8 @@ export default function DemoSetup() {
 
         <div className="mt-6 p-4 bg-muted/30 rounded-xl text-left">
           <p className="text-xs text-muted-foreground font-medium mb-2">Demo credentials that will be created:</p>
-          <p className="text-xs text-muted-foreground">Admin: admin@lumenar.com / admin123456</p>
-          <p className="text-xs text-muted-foreground">Kiosk: kiosk001@lumenar.com / kiosk123456</p>
+          <p className="text-xs text-muted-foreground">Admin: admin@akta.com / admin123456</p>
+          <p className="text-xs text-muted-foreground">Kiosk: kiosk001@akta.com / kiosk123456</p>
         </div>
       </div>
     </div>

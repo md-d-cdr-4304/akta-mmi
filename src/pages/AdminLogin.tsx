@@ -79,7 +79,7 @@ export default function AdminLogin() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@lumenar.com"
+                placeholder="admin@akta.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -135,7 +135,7 @@ export default function AdminLogin() {
         {/* Demo credentials */}
         <div className="mt-6 p-4 bg-accent/30 backdrop-blur-sm rounded-xl border border-border/30 text-center">
           <p className="text-xs text-muted-foreground font-medium mb-1">Demo Credentials</p>
-          <p className="text-xs text-foreground/80">admin@lumenar.com / admin123456</p>
+          <p className="text-xs text-foreground/80">admin@akta.com / admin123456</p>
         </div>
       </div>
     </div>

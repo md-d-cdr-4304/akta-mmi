@@ -26,7 +26,7 @@ export default function KioskSettings() {
 
           <div>
             <p className="text-sm font-medium text-muted-foreground mb-1">Email</p>
-            <p className="text-lg font-semibold text-foreground">kiosk001@lumenar.com</p>
+            <p className="text-lg font-semibold text-foreground">kiosk001@akta.com</p>
           </div>
         </CardContent>
       </Card>
